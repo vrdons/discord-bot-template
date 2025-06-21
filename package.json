@@ -1,0 +1,39 @@
+{
+  "name": "discord-bot-template",
+  "version": "0.1.0",
+  "description": "Discord bot template written with discord.js and typescript",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsx index.ts",
+    "watch": "tsx watch --exclude \"./database/**/*\" --exclude \"./logs/**/*\" index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vrdons/discord-bot-template.git"
+  },
+  "keywords": [
+    "discord.js",
+    "template",
+    "v14"
+  ],
+  "author": "vrdons",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vrdons/discord-bot-template/issues"
+  },
+  "homepage": "https://github.com/vrdons/discord-bot-template#readme",
+  "dependencies": {
+    "bytes": "^3.1.2",
+    "chalk": "^5.4.1",
+    "discord.js": "^14.20.0",
+    "dotenv": "^16.5.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/bytes": "^3.1.5",
+    "@types/node": "^24.0.3",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}
