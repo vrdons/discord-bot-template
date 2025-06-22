@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsx index.ts",
-    "watch": "tsx watch --exclude \"./database/**/*\" --exclude \"./logs/**/*\" index.ts"
+    "watch": "tsx watch --exclude \"./database/**/*\" --exclude \"./logs/**/*\" --include \"./src/**/*\" index.ts"
   },
   "repository": {
     "type": "git",
@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/vrdons/discord-bot-template#readme",
   "dependencies": {
+    "@sencinion/ms": "^0.0.2",
     "bytes": "^3.1.2",
     "chalk": "^5.4.1",
     "discord.js": "^14.20.0",

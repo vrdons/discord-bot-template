@@ -3,4 +3,6 @@ declare global {
     sent?: Function;
     alert?: Function;
   }
+  var SHARD_ID: number | undefined;
 }
+export {};

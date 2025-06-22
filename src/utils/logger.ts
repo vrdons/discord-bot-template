@@ -7,7 +7,7 @@ export const LOG_LEVELS = {
   warn: 2,
   info: 3,
   sent: 4,
-  debug: 4,
+  debug: 5,
 };
 const levelFormats: { [key: string]: string } = {
   alert: chalk.red("[ALERT]"),
@@ -77,29 +77,30 @@ const log = (level: string, message: string | Error) => {
     logger.log(level, message);
   }
 };
-
+const prefix = () =>
+  `${globalThis.SHARD_ID !== undefined ? `[${globalThis.SHARD_ID}] ` : ""}`;
 export function alert(message: string) {
-  log("alert", message);
+  log("alert", prefix() + message);
 }
 
 export function error(message: string | Error) {
-  log("error", message);
+  log("error", typeof message == "string" ? prefix() + message : message);
 }
 
 export function warn(message: string) {
-  log("warn", message);
+  log("warn", prefix() + message);
 }
 
 export function info(message: string) {
-  log("info", message);
+  log("info", prefix() + message);
 }
 
 export function sent(message: string) {
-  log("sent", message);
+  log("sent", prefix() + message);
 }
 
 export function debug(message: string) {
-  log("debug", message);
+  log("debug", prefix() + message);
 }
 export function globalLog() {
   globalThis.console.log = info;
@@ -108,4 +109,5 @@ export function globalLog() {
   globalThis.console.alert = alert;
   globalThis.console.sent = sent;
   globalThis.console.debug = debug;
+  debug("Logging");
 }
