@@ -17,33 +17,19 @@ const levelFormats: { [key: string]: string } = {
   sent: chalk.greenBright("[SENT]"),
   debug: chalk.blackBright("[DEBUG]"),
 };
-const consoleFormat = winston.format.printf(
-  ({
-    level,
-    message,
-    timestamp,
-    stack,
-  }: (LogEntry & { stack?: string }) | any) => {
-    const formattedTimestamp = chalk.bgGray.black(timestamp);
-    const levelLabel =
-      levelFormats[level] || chalk.magenta(`[${level.toUpperCase()}]`);
-    return stack
-      ? `${formattedTimestamp} ${levelLabel} ${message}\n${chalk.redBright(
-          stack
-        )}`
-      : `${formattedTimestamp} ${levelLabel} ${
-          level == "debug" ? chalk.blackBright(message) : message
-        }`;
-  }
-);
+const consoleFormat = winston.format.printf(({ level, message, timestamp, stack }: (LogEntry & { stack?: string }) | any) => {
+  const formattedTimestamp = chalk.bgGray.black(timestamp);
+  const levelLabel = levelFormats[level] || chalk.magenta(`[${level.toUpperCase()}]`);
+  return stack
+    ? `${formattedTimestamp} ${levelLabel} ${message}\n${chalk.redBright(stack)}`
+    : `${formattedTimestamp} ${levelLabel} ${level == "debug" ? chalk.blackBright(message) : message}`;
+});
 
-const fileFormat = winston.format.printf(
-  ({ level, message, timestamp, stack }) => {
-    return stack
-      ? `[${timestamp}] [${level.toUpperCase()}] ${message}\n  Stack trace:\n    ${stack}`
-      : `[${timestamp}] [${level.toUpperCase()}] ${message}`;
-  }
-);
+const fileFormat = winston.format.printf(({ level, message, timestamp, stack }) => {
+  return stack
+    ? `[${timestamp}] [${level.toUpperCase()}] ${message}\n  Stack trace:\n    ${stack}`
+    : `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+});
 
 const logger = winston.createLogger({
   level: "sent",
@@ -77,8 +63,8 @@ const log = (level: string, message: string | Error) => {
     logger.log(level, message);
   }
 };
-const prefix = () =>
-  `${globalThis.SHARD_ID !== undefined ? `[${globalThis.SHARD_ID}] ` : ""}`;
+export const clog = console.log;
+const prefix = () => `${globalThis.SHARD_ID !== undefined ? `[${globalThis.SHARD_ID}] ` : ""}`;
 export function alert(message: string) {
   log("alert", prefix() + message);
 }
