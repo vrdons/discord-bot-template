@@ -4,17 +4,22 @@ import { loadArray, loadMap } from "../utils/file";
 import path from "path";
 import ms from "ms";
 import { Command, ContextMenu, SlashCommand } from "../types/command";
+import { CooldownManager } from "./CooldownManager";
 
 export class Bot extends Client {
   private events: BotEvent[] = [];
-  contextMenu: ContextMenu[] = [];
+  private eventsPath = path.join(process.cwd(), "src", "events");
+  private prefixCommandPath = path.join(process.cwd(), "src", "commands", "prefix");
+  private slashCommandPath = path.join(process.cwd(), "src", "commands", "slash");
+  private contextMenuPath = path.join(process.cwd(), "src", "commands", "context");
   slashCommand: Map<string, SlashCommand> = new Map<string, SlashCommand>();
   prefixCommand: Map<string, Command> = new Map<string, Command>();
-  public eventsPath = path.join(process.cwd(), "src", "events");
-  public prefixCommandPath = path.join(process.cwd(), "src", "commands", "prefix");
-  public slashCommandPath = path.join(process.cwd(), "src", "commands", "slash");
-  public contextMenuPath = path.join(process.cwd(), "src", "commands", "context");
-  constructor(private _token: string, intents: BitFieldResolvable<GatewayIntentsString, number>, partials: readonly Partials[]) {
+  contextMenu: ContextMenu[] = [];
+  constructor(
+    private _token: string,
+    intents: BitFieldResolvable<GatewayIntentsString, number>,
+    partials: readonly Partials[],
+  ) {
     super({
       closeTimeout: ms("15s"),
       intents,
@@ -28,17 +33,25 @@ export class Bot extends Client {
           lifetime: ms("30m") / ms("1m"), // 30 dakikadan önceki mesajları tutma.
         },
         users: {
-          interval: ms("1h") / ms("1m"), // Her 1 saatte kontrol.
+          interval: ms("30m") / ms("1m"), // Her 1 saatte kontrol.
           filter: () => (user) => user.bot && user.id !== user.client.user.id, //Tüm botları sil.
         },
       },
       makeCache: Options.cacheWithLimits({
         ...Options.DefaultMakeCacheSettings,
+        VoiceStateManager: 5,
+        DMMessageManager: 10,
+        MessageManager: 50,
+        GuildEmojiManager: 10,
+        BaseGuildEmojiManager: 10,
+        GuildMemberManager: 50,
+        UserManager: 50,
       }),
     });
     try {
-      const debug = eval(process.env.DEBUG!);
-      this.on("debug", (m) => (debug ? console.debug(m) : eval("")));
+      if (process.env.DEBUG === "true") {
+        this.on("debug", console.debug);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -56,16 +69,19 @@ export class Bot extends Client {
     console.log(`Successfully reloaded ${data.length} application (/) commands.`);
   }
   public async reloadCommands() {
+    this.prefixCommand.clear();
+    this.slashCommand.clear();
+    this.contextMenu.length = 0;
     this.prefixCommand = await loadMap<Command>(this.prefixCommandPath, true, "P_COMMAND");
     this.slashCommand = await loadMap<SlashCommand>(this.slashCommandPath, true, "S_COMMAND");
     this.contextMenu = await loadArray<ContextMenu>(this.contextMenuPath, true, "C_COMMAND");
   }
   public async reloadEvents() {
-    console.debug("Reloading events...");
     this.removeAllListeners();
     try {
-      const debug = eval(process.env.DEBUG!);
-      this.on("debug", (m) => (debug ? console.debug(m) : eval("")));
+      if (process.env.DEBUG === "true") {
+        this.on("debug", console.debug);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -74,9 +90,9 @@ export class Bot extends Client {
       this.on("shardDisconnect", () => process?.send?.({ _disconnect: true }));
       this.on("shardReconnecting", () => process?.send?.({ _reconnecting: true }));
     }
-    this.events = [];
-
+    this.events.length = 0;
     this.events = await loadArray<BotEvent>(this.eventsPath, true, "EVENTS");
+
     for (const event of [...this.events]) {
       //TODO: FIX THIS I DONT KNOW
       //@ts-ignore

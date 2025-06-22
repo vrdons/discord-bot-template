@@ -11,7 +11,7 @@ export default {
     accessOnly: true,
   },
   async execute(message: Message, args: string[], cmd: string, client: Bot) {
-    if (!eval(process.env.SHARDING_MANAGER!)) return;
+    if (!(process.env.SHARDING_MANAGER! == "true")) return;
     console.warn("RESTARTING ALL SHARDS");
     await message.reply("Restarting all shards");
     client.restartAll();

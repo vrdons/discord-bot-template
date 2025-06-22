@@ -1,6 +1,7 @@
 import { Message } from "discord.js";
 import { Command } from "../../types/command";
 import { Bot } from "../../classes/Client";
+import { CooldownType } from "../../types/cooldown";
 
 export default {
   data: {
@@ -12,6 +13,10 @@ export default {
     detailedDescription: "Botun Discord API'ye olan gecikme süresini milisaniye cinsinden gösterir",
     usage: [`{{prefix}}ping`],
     examples: [`{{prefix}}ping`],
+  },
+  cooldown: {
+    duration: 3000,
+    type: CooldownType.USER,
   },
   async execute(message: Message, args: string[], cmd: string, client: Bot) {
     const ping = client.ws.ping;

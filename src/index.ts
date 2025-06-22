@@ -1,13 +1,9 @@
-import dotenv from "dotenv";
 import { Bot } from "./classes/Client";
 import { globalLog } from "./utils/logger";
-import { checkFailed } from "./utils/utils";
 import { GatewayIntentBits, Partials } from "discord.js";
+
 globalLog();
-dotenv.config();
-
-const SHARDING_MANAGER = eval(process.env.SHARDING_MANAGER!);
-
+const SHARDING_MANAGER = process.env.SHARDING_MANAGER! == "true";
 process
   .on("unhandledRejection", (error) => {
     console.log(`Unhandled promise rejection`);
@@ -27,11 +23,8 @@ const client = new Bot(
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
-    GatewayIntentBits.DirectMessageReactions,
     GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildPresences,
-    GatewayIntentBits.DirectMessagePolls,
   ],
-  [Partials.Channel, Partials.Message, Partials.User, Partials.Reaction, Partials.GuildMember]
+  [Partials.Channel, Partials.Message, Partials.User, Partials.Reaction, Partials.GuildMember],
 );
 client.reloadEvents();

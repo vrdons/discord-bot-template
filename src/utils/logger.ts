@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import winston, { LogEntry } from "winston";
 import bytes from "bytes";
+import { formatPrefix } from "./utils";
 export const LOG_LEVELS = {
   alert: 0,
   error: 1,
@@ -37,7 +38,7 @@ const logger = winston.createLogger({
   format: winston.format.combine(
     winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     winston.format.errors({ stack: true }),
-    winston.format.json({ space: 1 })
+    winston.format.json({ space: 1 }),
   ),
   transports: [
     new winston.transports.Console({
@@ -64,7 +65,7 @@ const log = (level: string, message: string | Error) => {
   }
 };
 export const clog = console.log;
-const prefix = () => `${process.env.SHARDS !== undefined ? `[${process.env.SHARDS}] ` : ""}`;
+const prefix = () => `${process.env.SHARDS !== undefined ? formatPrefix(process.env.SHARDS) : ""}`;
 export function alert(message: string) {
   log("alert", prefix() + message);
 }

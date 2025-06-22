@@ -12,7 +12,8 @@ export default {
   },
   async execute(message: Message, args: string[], cmd: string, client: Bot) {
     await message.reply("Reloading all commands/events");
-    if (eval(process.env.SHARDING_MANAGER!)) {
+    Bun.gc(true);
+    if (process.env.SHARDING_MANAGER! == "true") {
       //@ts-ignore
       await client.shard?.broadcastEval(async (c: Bot) => await c.reloadEvents());
       //@ts-ignore

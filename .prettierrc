@@ -1,6 +1,3 @@
 {
-  "parser": "typescript",
-
-  "prettier.proseWrap": "preserve",
   "printWidth": 150
 }

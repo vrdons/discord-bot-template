@@ -27,6 +27,7 @@ export async function loadStructures<T>(dir: PathLike, recursive = true, type?: 
       const structure = require(path.join(dir.toString(), file)).default;
       //  console.debug(`[${type}] ${file} yükleniyor...`);
       structures.push(structure);
+      delete require.cache[require.resolve(path.join(dir.toString(), file))];
     } catch (error) {
       //   console.error(`[${type}] ${file} yüklenemedi: ${error}`);
     }
