@@ -19,16 +19,16 @@ export async function loadStructures<T>(dir: PathLike, recursive = true, type?: 
     }
 
     if (!file.endsWith(".js") && !file.endsWith(".ts")) {
-      console.error(`[${type}] ${file} atlanıyor...`);
+      // console.error(`[${type}] ${file} atlanıyor...`);
       continue;
     }
 
     try {
       const structure = require(path.join(dir.toString(), file)).default;
-      console.debug(`[${type}] ${file} yükleniyor...`);
+      //  console.debug(`[${type}] ${file} yükleniyor...`);
       structures.push(structure);
     } catch (error) {
-      console.error(`[${type}] ${file} yüklenemedi: ${error}`);
+      //   console.error(`[${type}] ${file} yüklenemedi: ${error}`);
     }
   }
 

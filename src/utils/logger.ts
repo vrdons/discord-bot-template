@@ -64,7 +64,7 @@ const log = (level: string, message: string | Error) => {
   }
 };
 export const clog = console.log;
-const prefix = () => `${globalThis.SHARD_ID !== undefined ? `[${globalThis.SHARD_ID}] ` : ""}`;
+const prefix = () => `${process.env.SHARDS !== undefined ? `[${process.env.SHARDS}] ` : ""}`;
 export function alert(message: string) {
   log("alert", prefix() + message);
 }

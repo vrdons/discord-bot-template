@@ -1,5 +1,4 @@
 import dotenv from "dotenv";
-
 import { Bot } from "./classes/Client";
 import { globalLog } from "./utils/logger";
 import { checkFailed } from "./utils/utils";
@@ -7,23 +6,22 @@ import { GatewayIntentBits, Partials } from "discord.js";
 globalLog();
 dotenv.config();
 
-const allow_sharding = eval(process.env.SHARD!);
-if (!allow_sharding) {
-  process
-    .on("unhandledRejection", (error) => {
-      if (checkFailed(error as Error)) process.exit();
-      console.log(`Unhandled promise rejection`);
+const SHARDING_MANAGER = eval(process.env.SHARDING_MANAGER!);
 
-      console.error(error as Error);
-    })
-    .on("uncaughtException", (error) => {
-      if (checkFailed(error as Error)) process.exit();
-      console.log(`Uncaught exception`);
-      console.error(error as Error);
-    });
-}
+process
+  .on("unhandledRejection", (error) => {
+    console.log(`Unhandled promise rejection`);
+    console.error(error as Error);
+    if (SHARDING_MANAGER) process?.send?.({ _disconnect: true });
+  })
+  .on("uncaughtException", (error) => {
+    console.log(`Uncaught exception`);
+    console.error(error as Error);
+    if (SHARDING_MANAGER) process?.send?.({ _disconnect: true });
+  });
+
 const client = new Bot(
-  process.env.BOT_TOKEN!,
+  process.env.DISCORD_TOKEN!,
   [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
@@ -36,6 +34,4 @@ const client = new Bot(
   ],
   [Partials.Channel, Partials.Message, Partials.User, Partials.Reaction, Partials.GuildMember]
 );
-
 client.reloadEvents();
-client.connect();

@@ -1,15 +1,19 @@
-import { BitFieldResolvable, Client, GatewayIntentsString, Options, Partials } from "discord.js";
+import { BitFieldResolvable, Client, GatewayIntentsString, Options, Partials, REST, Routes } from "discord.js";
 import { BotEvent } from "../types/event";
 import { loadArray, loadMap } from "../utils/file";
 import path from "path";
 import ms from "ms";
+import { Command, ContextMenu, SlashCommand } from "../types/command";
 
 export class Bot extends Client {
   private events: BotEvent[] = [];
-  private contextMenu: any[] = []; //TODO: Add Context menu
-  private slashCommand: Map<string, any> = new Map<string, any>(); //TODO: Add Slash command support
-  private prefixCommand: Map<string, any> = new Map<string, any>(); //TODO: Add prefix command support
+  contextMenu: ContextMenu[] = [];
+  slashCommand: Map<string, SlashCommand> = new Map<string, SlashCommand>();
+  prefixCommand: Map<string, Command> = new Map<string, Command>();
   public eventsPath = path.join(process.cwd(), "src", "events");
+  public prefixCommandPath = path.join(process.cwd(), "src", "commands", "prefix");
+  public slashCommandPath = path.join(process.cwd(), "src", "commands", "slash");
+  public contextMenuPath = path.join(process.cwd(), "src", "commands", "context");
   constructor(private _token: string, intents: BitFieldResolvable<GatewayIntentsString, number>, partials: readonly Partials[]) {
     super({
       closeTimeout: ms("15s"),
@@ -38,18 +42,24 @@ export class Bot extends Client {
     } catch (error) {
       console.error(error);
     }
-    this.on("ready", () => {
-      globalThis.SHARD_ID = this.shard?.ids[0];
-    });
-  }
-  connect() {
-    console.debug("Connecting..");
     this.login(this._token);
   }
+
   public restartAll() {
     process?.send?.({ _sRespawnAll: true });
   }
-  public reloadCommands() {}
+  public async registerCommands() {
+    if (!this.isReady()) return;
+    const rest = new REST().setToken(this._token);
+    const commandData = [...this.slashCommand.values(), ...this.contextMenu].map((command) => command.data);
+    const data = (await rest.put(Routes.applicationCommands(this.user?.id), { body: commandData })) as { length: number };
+    console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+  }
+  public async reloadCommands() {
+    this.prefixCommand = await loadMap<Command>(this.prefixCommandPath, true, "P_COMMAND");
+    this.slashCommand = await loadMap<SlashCommand>(this.slashCommandPath, true, "S_COMMAND");
+    this.contextMenu = await loadArray<ContextMenu>(this.contextMenuPath, true, "C_COMMAND");
+  }
   public async reloadEvents() {
     console.debug("Reloading events...");
     this.removeAllListeners();
@@ -59,12 +69,11 @@ export class Bot extends Client {
     } catch (error) {
       console.error(error);
     }
-    this.on("ready", () => {
-      globalThis.SHARD_ID = this.shard?.ids[0];
-    });
-    this.on("shardReady", () => process?.send?.({ _ready: true }));
-    this.on("shardDisconnect", () => process?.send?.({ _disconnect: true }));
-    this.on("shardReconnecting", () => process?.send?.({ _reconnecting: true }));
+    if (process.env.SHARDING_MANAGER) {
+      this.on("shardReady", () => process?.send?.({ _ready: true }));
+      this.on("shardDisconnect", () => process?.send?.({ _disconnect: true }));
+      this.on("shardReconnecting", () => process?.send?.({ _reconnecting: true }));
+    }
     this.events = [];
 
     this.events = await loadArray<BotEvent>(this.eventsPath, true, "EVENTS");
